@@ -8,7 +8,7 @@ dnspython
 emoji
 feedparser
 future
-git+https://github.com/userbotindo/python-markdown2.git
+markdown2
 google_trans_new
 gtts
 lxml
@@ -16,14 +16,16 @@ pillow
 psutil
 psycopg2-binary
 pymongo[srv]
-python-telegram-bot==13.1
+python-telegram-bot==13.9.0
 pytz
 python-dotenv
 requests
 spamwatch
-speedtest-cli>=2.0.2
+speedtest-cli
 sqlalchemy
 telegraph
 wget
 wikipedia
 hurry.filesize
+asyncio
+git+https://github.com/python-telegram-bot/ptbcontrib.git
