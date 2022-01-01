@@ -22,7 +22,7 @@ python-dotenv
 requests
 spamwatch
 speedtest-cli
-sqlalchemy
+SQLAlchemy==1.4.29
 telegraph
 wget
 wikipedia
