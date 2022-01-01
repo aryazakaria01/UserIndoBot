@@ -105,14 +105,13 @@ def get(bot, update, notename, show_none=True, no_format=False):
                         message_id=note.value,
                     )
                 except BadRequest as excp:
-                    if excp.message == "Message to forward not found":
-                        message.reply_text(
-                            "This message seems to have been lost - I'll remove it "
-                            "from your notes list."
-                        )
-                        sql.rm_note(chat_id, notename)
-                    else:
+                    if excp.message != "Message to forward not found":
                         raise
+                    message.reply_text(
+                        "This message seems to have been lost - I'll remove it "
+                        "from your notes list."
+                    )
+                    sql.rm_note(chat_id, notename)
             else:
                 try:
                     bot.forward_message(
@@ -121,16 +120,15 @@ def get(bot, update, notename, show_none=True, no_format=False):
                         message_id=note.value,
                     )
                 except BadRequest as excp:
-                    if excp.message == "Message to forward not found":
-                        message.reply_text(
-                            "Looks like the original sender of this note has deleted "
-                            "their message - sorry! Get your bot admin to start using a "
-                            "message dump to avoid this. I'll remove this note from "
-                            "your saved notes."
-                        )
-                        sql.rm_note(chat_id, notename)
-                    else:
+                    if excp.message != "Message to forward not found":
                         raise
+                    message.reply_text(
+                        "Looks like the original sender of this note has deleted "
+                        "their message - sorry! Get your bot admin to start using a "
+                        "message dump to avoid this. I'll remove this note from "
+                        "your saved notes."
+                    )
+                    sql.rm_note(chat_id, notename)
         else:
             VALID_NOTE_FORMATTERS = [
                 "first",
@@ -197,26 +195,25 @@ def get(bot, update, notename, show_none=True, no_format=False):
                         disable_web_page_preview=True,
                         reply_markup=keyboard,
                     )
-                else:
-                    if (
+                elif (
                         ENUM_FUNC_MAP[note.msgtype]
                         == dispatcher.bot.send_sticker
                     ):
-                        ENUM_FUNC_MAP[note.msgtype](
-                            chat_id,
-                            note.file,
-                            reply_to_message_id=reply_id,
-                            reply_markup=keyboard,
-                        )
-                    else:
-                        ENUM_FUNC_MAP[note.msgtype](
-                            update.effective_chat.id,
-                            note.file,
-                            caption=text,
-                            reply_to_message_id=reply_id,
-                            parse_mode=parseMode,
-                            reply_markup=keyboard,
-                        )
+                    ENUM_FUNC_MAP[note.msgtype](
+                        chat_id,
+                        note.file,
+                        reply_to_message_id=reply_id,
+                        reply_markup=keyboard,
+                    )
+                else:
+                    ENUM_FUNC_MAP[note.msgtype](
+                        update.effective_chat.id,
+                        note.file,
+                        caption=text,
+                        reply_to_message_id=reply_id,
+                        parse_mode=parseMode,
+                        reply_markup=keyboard,
+                    )
 
             except BadRequest as excp:
                 if excp.message == "Entity_mention_user_invalid":
@@ -278,16 +275,12 @@ def save(update, context):
     chat = update.effective_chat
     user = update.effective_user
     conn = connected(context.bot, update, chat, user.id)
-    if not conn == False:
+    if conn != False:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
     else:
         chat_id = update.effective_chat.id
-        if chat.type == "private":
-            chat_name = "local notes"
-        else:
-            chat_name = chat.title
-
+        chat_name = "local notes" if chat.type == "private" else chat.title
     msg = update.effective_message
 
     try:
@@ -325,16 +318,12 @@ def clear(update, context):
     msg = update.effective_message
     conn = connected(context.bot, update, chat, user.id)
 
-    if not conn == False:
+    if conn != False:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
     else:
         chat_id = update.effective_chat.id
-        if chat.type == "private":
-            chat_name = "local notes"
-        else:
-            chat_name = chat.title
-
+        chat_name = "local notes" if chat.type == "private" else chat.title
     if len(args) >= 1:
         notename = args[0].lower()
 
@@ -362,7 +351,7 @@ def list_notes(update, context):
     chat = update.effective_chat
     user = update.effective_user
     conn = connected(context.bot, update, chat, user.id, need_admin=False)
-    if not conn == False:
+    if conn != False:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
         msg = "*Notes in {}:*\n"
@@ -389,7 +378,7 @@ def list_notes(update, context):
     if not note_list:
         update.effective_message.reply_text("No notes saved here!")
 
-    elif len(msg) != 0:
+    elif msg != '':
         try:
             update.effective_message.reply_text(
                 msg.format(chat_name) + des, parse_mode=ParseMode.MARKDOWN

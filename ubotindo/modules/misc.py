@@ -186,8 +186,6 @@ def info(update, context):
             text += "\n\n<b>This person is banned in Spamwatch!</b>"
             text += f"\n<b>Reason:</b> <pre>{sw.reason}</pre>"
             text += "\nAppeal at @SpamWatchSupport"
-        else:
-            pass
     except BaseException:
         pass  # don't crash if api is down somehow...
 
@@ -229,7 +227,7 @@ def info(update, context):
 
     try:
         memstatus = chat.get_member(user.id).status
-        if memstatus == "administrator" or memstatus == "creator":
+        if memstatus in ["administrator", "creator"]:
             result = context.bot.get_chat_member(chat.id, user.id)
             if result.custom_title:
                 text += f"\n\nThis user has custom title <b>{result.custom_title}</b> in this chat."
@@ -339,7 +337,7 @@ def markdown_help(update, context):
 def wiki(update, context):
     kueri = re.split(pattern="wiki", string=update.effective_message.text)
     wikipedia.set_lang("en")
-    if len(str(kueri[1])) == 0:
+    if str(kueri[1]) == '':
         update.effective_message.reply_text("Enter keywords!")
     else:
         try:
@@ -517,7 +515,7 @@ def stats(update, context):
 @typing_action
 def covid(update, context):
     message = update.effective_message
-    country = str(message.text[len(f"/covid ") :])
+    country = str(message.text[len('/covid '):])
     data = Covid(source="worldometers")
 
     if country == "":

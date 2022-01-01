@@ -1,4 +1,5 @@
 """Initial app framework"""
+
 # UserindoBot
 # Copyright (C) 2020  UserindoBot Team, <https://github.com/userbotindo/UserIndoBot.git>
 #
@@ -57,24 +58,20 @@ OWNER_ID = int(os.environ.get("OWNER_ID") or 0)
 MESSAGE_DUMP = os.environ.get("MESSAGE_DUMP") or None
 GBAN_LOGS = os.environ.get("GBAN_LOGS") or None
 OWNER_USERNAME = os.environ.get("OWNER_USERNAME") or None
-DEV_USERS = set(int(x) for x in os.environ.get("DEV_USERS", "").split())
-SUDO_USERS = set(int(x) for x in os.environ.get("SUDO_USERS", "").split())
-SUPPORT_USERS = set(
-    int(x) for x in os.environ.get(
+DEV_USERS = {int(x) for x in os.environ.get("DEV_USERS", "").split()}
+SUDO_USERS = {int(x) for x in os.environ.get("SUDO_USERS", "").split()}
+SUPPORT_USERS = {int(x) for x in os.environ.get(
         "SUPPORT_USERS",
-        "").split())
-WHITELIST_USERS = set(
-    int(x) for x in os.environ.get(
+        "").split()}
+WHITELIST_USERS = {int(x) for x in os.environ.get(
         "WHITELIST_USERS",
-        "").split())
-WHITELIST_CHATS = set(
-    int(x) for x in os.environ.get(
+        "").split()}
+WHITELIST_CHATS = {int(x) for x in os.environ.get(
         "WHITELIST_CHATS",
-        "").split())
-BLACKLIST_CHATS = set(
-    int(x) for x in os.environ.get(
+        "").split()}
+BLACKLIST_CHATS = {int(x) for x in os.environ.get(
         "BLACKLIST_CHATS",
-        "").split())
+        "").split()}
 WEBHOOK = eval(os.environ.get("WEBHOOK") or "False")
 URL = os.environ.get("URL", "")
 PORT = int(os.environ.get("PORT", 5000))
