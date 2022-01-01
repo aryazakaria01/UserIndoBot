@@ -776,9 +776,9 @@ def main():
     )
 
     migrate_handler = MessageHandler(
-        Filters.status_update.migrate, migrate_chats
+        Filters.status_update.migrate, migrate_chats, run_async=True
     )
-    is_chat_allowed_handler = MessageHandler(Filters.chat_type.groups, is_chat_allowed)
+    is_chat_allowed_handler = MessageHandler(Filters.chat_type.groups, is_chat_allowed, run_async=True)
 
     # dispatcher.add_handler(test_handler)
     dispatcher.add_handler(start_handler)
@@ -793,7 +793,7 @@ def main():
 
     if WEBHOOK:
         LOGGER.info("Using webhooks.")
-        updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN)
+        updater.start_webhook(listen="127.0.0.1", port=PORT, url_path=TOKEN)
 
         if CERT_PATH:
             updater.bot.set_webhook(
