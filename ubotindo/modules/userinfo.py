@@ -37,11 +37,7 @@ def about_me(update, context):
     args = context.args
     user_id = extract_user(message, args)
 
-    if user_id:
-        user = context.bot.get_chat(user_id)
-    else:
-        user = message.from_user
-
+    user = context.bot.get_chat(user_id) if user_id else message.from_user
     info = USER_INFO.find_one({'_id': user.id})
 
     if info:
@@ -95,11 +91,7 @@ def about_bio(update, context):
     args = context.args
 
     user_id = extract_user(message, args)
-    if user_id:
-        user = context.bot.get_chat(user_id)
-    else:
-        user = message.from_user
-
+    user = context.bot.get_chat(user_id) if user_id else message.from_user
     info = USER_BIO.find_one({'_id': user.id})
 
     if info:

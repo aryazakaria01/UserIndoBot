@@ -179,13 +179,11 @@ def export_data(update, context):
         else:
             if user.id != OWNER_ID or user.id not in DEV_USERS:
                 put_chat(chat_id, new_jam, chat_data)
-    else:
-        if user.id != OWNER_ID or user.id not in DEV_USERS:
-            put_chat(chat_id, new_jam, chat_data)
+    elif user.id != OWNER_ID or user.id not in DEV_USERS:
+        put_chat(chat_id, new_jam, chat_data)
 
     note_list = sql.get_all_chat_notes(chat_id)
     backup = {}
-    notes = {}
     # button = ""
     buttonlist = []
     namacat = ""
@@ -255,10 +253,13 @@ def export_data(update, context):
             )
         else:
             isicat += "{}<###splitter###>".format(note.value)
-    for x in range(count):
-        notes[
-            "#{}".format(namacat.split("<###splitter###>")[x])
-        ] = "{}".format(isicat.split("<###splitter###>")[x])
+    notes = {
+        "#{}".format(namacat.split("<###splitter###>")[x]): "{}".format(
+            isicat.split("<###splitter###>")[x]
+        )
+        for x in range(count)
+    }
+
     # Rules
     rules = chat_rules(chat_id)
     # Blacklist
@@ -387,18 +388,14 @@ def export_data(update, context):
 # Temporary data
 def put_chat(chat_id, value, chat_data):
     # print(chat_data)
-    if not value:
-        status = False
-    else:
-        status = True
+    status = bool(value)
     chat_data[chat_id] = {"backups": {"status": status, "value": value}}
 
 
 def get_chat(chat_id, chat_data):
     # print(chat_data)
     try:
-        value = chat_data[chat_id]["backups"]
-        return value
+        return chat_data[chat_id]["backups"]
     except KeyError:
         return {"status": False, "value": False}
 

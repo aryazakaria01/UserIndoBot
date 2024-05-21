@@ -27,8 +27,7 @@ def is_afk(user_id) -> bool:
 
 
 def check_afk_status(user_id) -> dict:
-    data = AFK_USERS.find_one({'_id': user_id})
-    return data
+    return AFK_USERS.find_one({'_id': user_id})
 
 
 def set_afk(user_id, reason: str="") -> None:

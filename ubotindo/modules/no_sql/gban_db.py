@@ -54,7 +54,7 @@ def get_gbanned_user(user_id):
 
 
 def get_gban_list() -> dict:
-    return [i for i in GBAN_USER.find()]
+    return list(GBAN_USER.find())
 
 
 def enable_gbans(chat_id) -> None:
@@ -100,10 +100,7 @@ def __load_gban_stat_list() -> None:
 
 def migrate_chat(old_chat_id, new_chat_id) -> None:
     old = GBAN_SETTINGS.find_one_and_delete({'_id': old_chat_id})
-    if old:
-        setting = old["setting"]
-    else:
-        setting = True
+    setting = old["setting"] if old else True
     GBAN_SETTINGS.update_one(
         {'_id': new_chat_id},
         {"$set": {'setting': setting}},

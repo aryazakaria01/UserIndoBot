@@ -319,13 +319,11 @@ def warns(update, context):
     else:
         if chat.type == "private":
             return
-        else:
-            chat_id = update.effective_chat.id
-            chat_name = chat.title
+        chat_id = update.effective_chat.id
+        chat_name = chat.title
 
     result = sql.get_warns(user_id, chat_id)
 
-    num = 1
     if result and result[0] != 0:
         num_warns, reasons = result
         limit, _ = sql.get_warn_setting(chat_id)
@@ -340,10 +338,8 @@ def warns(update, context):
                     num_warns,
                     limit,
                 )
-            for reason in reasons:
+            for num, reason in enumerate(reasons, start=1):
                 text += "\n {}. {}".format(num, reason)
-                num += 1
-
             msgs = split_message(text)
             for msg in msgs:
                 update.effective_message.reply_text(msg, parse_mode="markdown")
@@ -377,23 +373,21 @@ def add_warn_filter(update, context):
     else:
         if chat.type == "private":
             return
-        else:
-            chat_id = update.effective_chat.id
-            chat_name = chat.title
+        chat_id = update.effective_chat.id
+        chat_name = chat.title
 
     if len(args) < 2:
         return
 
     extracted = split_quotes(args[1])
 
-    if len(extracted) >= 2:
-        # set trigger -> lower, so as to avoid adding duplicate filters with
-        # different cases
-        keyword = extracted[0].lower()
-        content = extracted[1]
-
-    else:
+    if len(extracted) < 2:
         return
+
+    # set trigger -> lower, so as to avoid adding duplicate filters with
+    # different cases
+    keyword = extracted[0].lower()
+    content = extracted[1]
 
     # Note: perhaps handlers can be removed somehow using sql.get_chat_filters
     for handler in dispatcher.handlers.get(WARN_HANDLER_GROUP, []):
@@ -418,11 +412,10 @@ def remove_warn_filter(update, context):
     conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat_id = conn
+    elif chat.type == "private":
+        return
     else:
-        if chat.type == "private":
-            return
-        else:
-            chat_id = update.effective_chat.id
+        chat_id = update.effective_chat.id
 
     args = msg.text.split(
         None, 1
@@ -462,11 +455,10 @@ def list_warn_filters(update, context):
     conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat_id = conn
+    elif chat.type == "private":
+        return
     else:
-        if chat.type == "private":
-            return
-        else:
-            chat_id = update.effective_chat.id
+        chat_id = update.effective_chat.id
 
     all_handlers = sql.get_chat_warn_triggers(chat_id)
 
@@ -487,7 +479,7 @@ def list_warn_filters(update, context):
         else:
             filter_list += entry
 
-    if not filter_list == CURRENT_WARNING_FILTER_STRING:
+    if filter_list != CURRENT_WARNING_FILTER_STRING:
         update.effective_message.reply_text(
             filter_list, parse_mode=ParseMode.HTML
         )
@@ -528,9 +520,8 @@ def set_warn_limit(update, context) -> str:
     else:
         if chat.type == "private":
             return
-        else:
-            chat_id = update.effective_chat.id
-            chat_name = chat.title
+        chat_id = update.effective_chat.id
+        chat_name = chat.title
 
     if args:
         if args[0].isdigit():
@@ -580,9 +571,8 @@ def set_warn_strength(update, context):
     else:
         if chat.type == "private":
             return
-        else:
-            chat_id = update.effective_chat.id
-            chat_name = chat.title
+        chat_id = update.effective_chat.id
+        chat_name = chat.title
 
     if args:
         if args[0].lower() in ("on", "yes"):
@@ -640,7 +630,7 @@ def __stats__():
 
 def __import_data__(chat_id, data):
     for user_id, count in data.get("warns", {}).items():
-        for x in range(int(count)):
+        for _ in range(int(count)):
             sql.warn_user(user_id, chat_id)
 
 

@@ -83,33 +83,32 @@ def report_setting(update, context):
                 parse_mode=ParseMode.MARKDOWN,
             )
 
-    else:
-        if len(args) >= 1:
-            if args[0] in ("yes", "on", "true"):
-                CHAT_REPORT_SETTINGS.update_one(
-                    {'chat_id': int(chat.id)},
-                    {"$set": {'should_report': True}},
-                    upsert=True)
-                msg.reply_text(
-                    "Turned on reporting! Admins who have turned on reports will be notified when /report "
-                    "or @admin are called."
-                )
-
-            elif args[0] in ("no", "off", "false"):
-                CHAT_REPORT_SETTINGS.update_one(
-                    {'chat_id': int(chat.id)},
-                    {"$set": {'should_report': False}},
-                    upsert=True)
-                msg.reply_text(
-                    "Turned off reporting! No admins will be notified on /report or @admin."
-                )
-        else:
+    elif len(args) >= 1:
+        if args[0] in ("yes", "on", "true"):
+            CHAT_REPORT_SETTINGS.update_one(
+                {'chat_id': int(chat.id)},
+                {"$set": {'should_report': True}},
+                upsert=True)
             msg.reply_text(
-                "This chat's current setting is: `{}`".format(
-                    chat_should_report(chat.id)
-                ),
-                parse_mode=ParseMode.MARKDOWN,
+                "Turned on reporting! Admins who have turned on reports will be notified when /report "
+                "or @admin are called."
             )
+
+        elif args[0] in ("no", "off", "false"):
+            CHAT_REPORT_SETTINGS.update_one(
+                {'chat_id': int(chat.id)},
+                {"$set": {'should_report': False}},
+                upsert=True)
+            msg.reply_text(
+                "Turned off reporting! No admins will be notified on /report or @admin."
+            )
+    else:
+        msg.reply_text(
+            "This chat's current setting is: `{}`".format(
+                chat_should_report(chat.id)
+            ),
+            parse_mode=ParseMode.MARKDOWN,
+        )
 
 
 @user_not_admin
@@ -127,7 +126,7 @@ def report(update, context) -> str:
         admin_list = chat.get_administrators()
 
         isadmeme = chat.get_member(reported_user.id).status
-        if isadmeme == "administrator" or isadmeme == "creator":
+        if isadmeme in ["administrator", "creator"]:
             return ""  # No point of reporting admins!
 
         if user.id == reported_user.id:
@@ -171,7 +170,6 @@ def report(update, context) -> str:
                     ),
                 ],
             ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
         else:
             reported = f"Reported {mention_html(reported_user.id, reported_user.first_name)} to the admins!"
 
@@ -188,8 +186,7 @@ def report(update, context) -> str:
                     callback_data=f"report_{chat.id}=banned={reported_user.id}={reported_user.first_name}",
                 ),
             ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-
+        reply_markup = InlineKeyboardMarkup(keyboard)
         for admin in admin_list:
             if admin.user.is_bot:  # can't message bots
                 continue
@@ -213,9 +210,7 @@ def report(update, context) -> str:
                 except Unauthorized:
                     pass
                 except BadRequest as excp:  # TODO: cleanup exceptions
-                    if excp.message == "Message_id_invalid":
-                        pass
-                    else:
+                    if excp.message != "Message_id_invalid":
                         LOGGER.exception(
                             "Exception while reporting user " + excp.message
                         )

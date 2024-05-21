@@ -222,9 +222,7 @@ def gban(update, context):
         try:
             context.bot.kick_chat_member(chat.id, user_chat.id)
         except BadRequest as excp:
-            if excp.message in GBAN_ERRORS:
-                pass
-
+            pass
         gban_db.gban_user(user_id, user_chat.username or user_chat.first_name, reason)
 
 
@@ -281,9 +279,7 @@ def ungban(update, context):
                 context.bot.unban_chat_member(chat_id, user_id)
 
         except BadRequest as excp:
-            if excp.message in UNGBAN_ERRORS:
-                pass
-            else:
+            if excp.message not in UNGBAN_ERRORS:
                 message.reply_text(
                     "Could not un-gban due to: {}".format(excp.message)
                 )
